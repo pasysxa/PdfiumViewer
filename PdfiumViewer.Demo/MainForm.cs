@@ -93,7 +93,7 @@ namespace PdfiumViewer.Demo
 
             var document = pdfViewer1.Document;
 
-            for (int i = 0; i < document.PageCount; i++ )
+            for (int i = 0; i < document.PageCount; i++)
             {
                 using (var image = document.Render(
                         i, (int)document.PageSizes[i].Width, (int)document.PageSizes[i].Height, 96, 96, false))

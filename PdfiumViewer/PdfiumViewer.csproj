@@ -10,8 +10,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>PdfiumViewer</RootNamespace>
     <AssemblyName>PdfiumViewer</AssemblyName>
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
@@ -53,6 +54,12 @@
     <Compile Include="NativeMethods.Pdfium.cs" />
     <Compile Include="PanningZoomingScrollControl.cs">
       <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="PasysPdfViewer.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PasysPdfViewer.Designer.cs">
+      <DependentUpon>PasysPdfViewer.cs</DependentUpon>
     </Compile>
     <Compile Include="PdfException.cs" />
     <Compile Include="PdfBufferFile.cs" />
@@ -108,6 +115,9 @@
     <None Include="Resources\ShadeBorder-NW.png" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="PasysPdfViewer.resx">
+      <DependentUpon>PasysPdfViewer.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="PdfViewer.nl.resx">
       <DependentUpon>PdfViewer.cs</DependentUpon>
     </EmbeddedResource>
