@@ -175,6 +175,54 @@ namespace PdfiumViewer
             _fileName = string.Empty;
         }
 
+        /// <summary>
+        /// イメージの生成
+        /// </summary>
+        /// <param name="reduceRate">イメージの縮小率</param>
+        public void ToBitmaps(float reduceRate)
+        {
+            if (reduceRate < 0.1 || reduceRate > 1)
+            {
+                new ArgumentException("0.1~1間の値を設定しかないです");
+            }
+
+            if (string.IsNullOrEmpty(BaseSaveBitmapsPath) || !Directory.Exists(BaseSaveBitmapsPath))
+            {
+                new ArgumentException("指定したディレクトリは存在しません。");
+            }
+
+            var folderName = Path.GetRandomFileName();
+            if (!Directory.Exists(folderName))
+            {
+                Directory.CreateDirectory(Path.Combine(BaseSaveBitmapsPath, folderName));
+            }
+
+            try
+            {
+                var fileName = Path.GetFileNameWithoutExtension(_fileName);
+                for (int i = 0; i < Document.PageCount; i++)
+                {
+                    var pageSize = Document.PageSizes[i].ToSize();
+                    var imageWidth = (int)(pageSize.Width * reduceRate);
+                    var imageHeight = (int)(pageSize.Height * reduceRate);
+
+                    using (var image = Document.Render(
+                            i, imageWidth, imageHeight, 96, 96, false))
+                    {
+                        image.Save(Path.Combine(BaseSaveBitmapsPath, folderName, string.Format("{0}_{1}.png", fileName, i)));
+                    }
+                }
+            }
+            catch
+            {
+
+            }
+        }
+
+        /// <summary>
+        /// イメージの生成
+        /// </summary>
+        /// <param name="imageSize">イメージのサイズ</param>
         public void ToBitmaps(Size imageSize)
         {
             if (string.IsNullOrEmpty(BaseSaveBitmapsPath) || !Directory.Exists(BaseSaveBitmapsPath))
@@ -199,20 +247,20 @@ namespace PdfiumViewer
                 for (int i = 0; i < Document.PageCount; i++)
                 {
                     var pageSize = Document.PageSizes[i].ToSize();
-                    //var imageWidth = imageSize.Width;
-                    //var imageHeight = imageSize.Height;
+                    var imageWidth = imageSize.Width;
+                    var imageHeight = imageSize.Height;
 
-                    //if (imageWidth > pageSize.Width)
-                    //{
-                    //    imageWidth = pageSize.Width;
-                    //}
-                    //if (imageHeight > pageSize.Height)
-                    //{
-                    //    imageHeight = pageSize.Height;
-                    //}
+                    if (imageWidth > pageSize.Width)
+                    {
+                        imageWidth = pageSize.Width;
+                    }
+                    if (imageHeight > pageSize.Height)
+                    {
+                        imageHeight = pageSize.Height;
+                    }
 
                     using (var image = Document.Render(
-                            i, pageSize.Width, pageSize.Height, 96, 96, false))
+                            i, imageWidth, imageHeight, 96, 96, false))
                     {
                         image.Save(Path.Combine(BaseSaveBitmapsPath, folderName, string.Format("{0}_{1}.png", fileName, i)));
                     }

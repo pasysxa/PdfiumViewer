@@ -71,7 +71,7 @@ namespace PdfiumViewer.PasysDemo
 
         private void btnToBitmaps_Click(object sender, EventArgs e)
         {
-            pdfViewer.ToBitmaps(new Size(100, 100));
+            pdfViewer.ToBitmaps(0.8f);
         }
     }
 }
