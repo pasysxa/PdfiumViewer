@@ -156,7 +156,7 @@ namespace PdfiumViewer
         {
             var size = PageSizes[page];
 
-            return Render(page, (int)size.Width, (int)size.Height, dpiX, dpiY, forPrinting);
+            return Render(page, (int)size.Width, (int)size.Height, dpiX, dpiY, 0, forPrinting);
         }
 
         /// <summary>
@@ -171,7 +171,7 @@ namespace PdfiumViewer
         {
             var size = PageSizes[page];
 
-            return Render(page, (int)size.Width, (int)size.Height, dpiX, dpiY, flags);
+            return Render(page, (int)size.Width, (int)size.Height, dpiX, dpiY, 0, flags);
         }
 
         /// <summary>
@@ -184,9 +184,9 @@ namespace PdfiumViewer
         /// <param name="dpiY">Vertical DPI.</param>
         /// <param name="forPrinting">Render the page for printing.</param>
         /// <returns>The rendered image.</returns>
-        public Image Render(int page, int width, int height, float dpiX, float dpiY, bool forPrinting)
+        public Image Render(int page, int width, int height, float dpiX, float dpiY, int rotate, bool forPrinting)
         {
-            return Render(page, width, height, dpiX, dpiY, forPrinting ? PdfRenderFlags.ForPrinting : PdfRenderFlags.None);
+            return Render(page, width, height, dpiX, dpiY, rotate, forPrinting ? PdfRenderFlags.ForPrinting : PdfRenderFlags.None);
         }
 
         /// <summary>
@@ -199,10 +199,17 @@ namespace PdfiumViewer
         /// <param name="dpiY">Vertical DPI.</param>
         /// <param name="flags">Flags used to influence the rendering.</param>
         /// <returns>The rendered image.</returns>
-        public Image Render(int page, int width, int height, float dpiX, float dpiY, PdfRenderFlags flags)
+        public Image Render(int page, int width, int height, float dpiX, float dpiY, int rotate, PdfRenderFlags flags)
         {
             if (_disposed)
                 throw new ObjectDisposedException(GetType().Name);
+
+            if (rotate == 1 || rotate == 3)
+            {
+                var temp = width;
+                width = height;
+                height = temp;
+            }
 
             var bitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb);
             var data = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadWrite, bitmap.PixelFormat);
@@ -221,7 +228,7 @@ namespace PdfiumViewer
                         page,
                         handle,
                         (int)dpiX, (int)dpiY,
-                        0, 0, width, height,
+                        0, 0, width, height, rotate,
                         FlagsToFPDFFlags(flags)
                     );
 

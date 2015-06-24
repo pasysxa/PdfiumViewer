@@ -422,9 +422,6 @@ namespace PdfiumViewer
                     DrawPageImage(e.Graphics, page, pageBounds);
 
                     _shadeBorder.Draw(e.Graphics, pageBounds);
-                    var pageOutBounds = pageCache.OuterBounds;
-                    pageOutBounds.Offset(leftOffset, topOffset);
-                    e.Graphics.DrawRectangle(Pens.Blue, pageOutBounds);
                 }
             }
 
