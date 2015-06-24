@@ -94,6 +94,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="RotateType.cs" />
     <Compile Include="ScrollAction.cs" />
     <Compile Include="SetCursorEventHandler.cs" />
     <Compile Include="ShadeBorder.cs" />

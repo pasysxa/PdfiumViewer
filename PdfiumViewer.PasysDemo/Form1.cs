@@ -73,5 +73,35 @@ namespace PdfiumViewer.PasysDemo
         {
             pdfViewer.ToBitmaps(0.8f);
         }
+
+        private void btnFitWidth_Click(object sender, EventArgs e)
+        {
+            pdfViewer.FitPage(PdfViewerZoomMode.FitWidth);
+        }
+
+        private void btnFitHeight_Click(object sender, EventArgs e)
+        {
+            pdfViewer.FitPage(PdfViewerZoomMode.FitHeight);
+        }
+
+        private void btnRotate0_Click(object sender, EventArgs e)
+        {
+            pdfViewer.RotateType = RotateType.RotateNone;
+        }
+
+        private void btnRotate90_Click(object sender, EventArgs e)
+        {
+            pdfViewer.RotateType = RotateType.Rotate90;
+        }
+
+        private void btnRotate180_Click(object sender, EventArgs e)
+        {
+            pdfViewer.RotateType = RotateType.Rotate180;
+        }
+
+        private void btnRotate270_Click(object sender, EventArgs e)
+        {
+            pdfViewer.RotateType = RotateType.Rotate270;
+        }
     }
 }

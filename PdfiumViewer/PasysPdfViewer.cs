@@ -54,6 +54,18 @@ namespace PdfiumViewer
             set { renderer.ZoomMode = value; }
         }
 
+        public RotateType RotateType
+        {
+            get
+            {
+                return renderer.RotateType;
+            }
+            set
+            {
+                renderer.RotateType = value;
+            }
+        }
+
         public double Zoom
         {
             get
@@ -62,7 +74,6 @@ namespace PdfiumViewer
             }
             set
             {
-                renderer.ZoomFactor = 1;
                 renderer.Zoom = renderer.ZoomFactor * value;
             }
         }

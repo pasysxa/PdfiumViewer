@@ -15,9 +15,10 @@ namespace PdfiumViewer
     {
         private static readonly Padding PageMargin = new Padding(4);
 
-        private int _height;
-        private int _maxWidth;
-        private int _maxHeight;
+        private double _width;
+        private double _height;
+        private double _maxWidth;
+        private double _maxHeight;
         private bool _disposed;
         private double _scaleFactor;
         private ShadeBorder _shadeBorder = new ShadeBorder();
@@ -25,6 +26,7 @@ namespace PdfiumViewer
         private PdfDocument _document;
         private ToolTip _toolTip;
         private PdfViewerZoomMode _zoomMode;
+        private RotateType _rotateType;
         private bool _pageCacheValid;
         private readonly List<PageCache> _pageCache = new List<PageCache>();
         private int _visiblePageStart;
@@ -93,6 +95,44 @@ namespace PdfiumViewer
             }
         }
 
+        public RotateType RotateType
+        {
+            get { return _rotateType; }
+            set
+            {
+                _width = 0;
+                _height = 0;
+                _maxWidth = 0;
+                _maxHeight = 0;
+                switch (value)
+                {
+                    case PdfiumViewer.RotateType.RotateNone:
+                    case PdfiumViewer.RotateType.Rotate180:
+                        foreach (var size in _document.PageSizes)
+                        {
+                            _width += size.Width;
+                            _height += size.Height;
+                            _maxWidth = Math.Max(size.Width, _maxWidth);
+                            _maxHeight = Math.Max(size.Height, _maxHeight);
+                        }
+                        break;
+                    case PdfiumViewer.RotateType.Rotate90:
+                    case PdfiumViewer.RotateType.Rotate270:
+                        foreach (var size in _document.PageSizes)
+                        {
+                            _height += size.Width;
+                            _width += size.Height;
+                            _maxWidth = Math.Max(size.Height, _maxWidth);
+                            _maxHeight = Math.Max(size.Width, _maxHeight);
+                        }
+                        break;
+                }
+                _rotateType = value;
+                PerformLayout();
+                Invalidate();
+            }
+        }
+
         /// <summary>
         /// Initializes a new instance of the PdfRenderer class.
         /// </summary>
@@ -144,9 +184,10 @@ namespace PdfiumViewer
 
             foreach (var size in _document.PageSizes)
             {
-                _height += (int)size.Height;
-                _maxWidth = Math.Max((int)size.Width, _maxWidth);
-                _maxHeight = Math.Max((int)size.Height, _maxHeight);
+                _width += size.Width;
+                _height += size.Height;
+                _maxWidth = Math.Max(size.Width, _maxWidth);
+                _maxHeight = Math.Max(size.Height, _maxHeight);
             }
 
             UpdateScrollbars();
@@ -195,20 +236,67 @@ namespace PdfiumViewer
 
             _pageCacheValid = true;
 
-            int maxWidth = (int)(_maxWidth * _scaleFactor) + ShadeBorder.Size.Horizontal + PageMargin.Horizontal;
-            int leftOffset = -maxWidth / 2;
+            int maxWidth = 0;
+            int leftOffset = 0;
+            //Pasys^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^Added
+            switch (_rotateType)
+            {
+                case PdfiumViewer.RotateType.RotateNone:
+                case PdfiumViewer.RotateType.Rotate180:
+                    maxWidth = (int)(_maxWidth * _scaleFactor) + ShadeBorder.Size.Horizontal + PageMargin.Horizontal;
+                    leftOffset = -maxWidth / 2;
+                    break;
+                case PdfiumViewer.RotateType.Rotate90:
+                case PdfiumViewer.RotateType.Rotate270:
+                    maxWidth = (int)(_maxHeight * _scaleFactor) + ShadeBorder.Size.Horizontal + PageMargin.Horizontal;
+                    leftOffset = -maxWidth / 2;
+                    break;
+            }
+            //int maxWidth = (int)(_maxWidth * _scaleFactor) + ShadeBorder.Size.Horizontal + PageMargin.Horizontal;
+            //int leftOffset = -maxWidth / 2;
+            //Pasys^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^Added
 
             int offset = 0;
 
             for (int page = 0; page < _document.PageSizes.Count; page++)
             {
                 var size = _document.PageSizes[page];
-                int height = (int)(size.Height * _scaleFactor);
-                int fullHeight = height + ShadeBorder.Size.Vertical + PageMargin.Vertical;
-                int width = (int)(size.Width * _scaleFactor);
-                int maxFullWidth = (int)(_maxWidth * _scaleFactor) + ShadeBorder.Size.Horizontal + PageMargin.Horizontal;
-                int fullWidth = width + ShadeBorder.Size.Horizontal + PageMargin.Horizontal;
-                int thisLeftOffset = leftOffset + (maxFullWidth - fullWidth) / 2;
+                double height = 0;
+                double fullHeight = 0;
+                double width = 0;
+                double maxFullWidth = 0;
+                double fullWidth = 0;
+                double thisLeftOffset = 0;
+                //Pasys^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^Added
+                switch (_rotateType)
+                {
+                    case PdfiumViewer.RotateType.RotateNone:
+                    case PdfiumViewer.RotateType.Rotate180:
+                        height = size.Height * _scaleFactor;
+                        fullHeight = height + ShadeBorder.Size.Vertical + PageMargin.Vertical;
+                        width = size.Width * _scaleFactor;
+                        maxFullWidth = _maxWidth * _scaleFactor + ShadeBorder.Size.Horizontal + PageMargin.Horizontal;
+                        fullWidth = width + ShadeBorder.Size.Horizontal + PageMargin.Horizontal;
+                        thisLeftOffset = leftOffset + (maxFullWidth - fullWidth) / 2d;
+                        break;
+                    case PdfiumViewer.RotateType.Rotate90:
+                    case PdfiumViewer.RotateType.Rotate270:
+                        height = (int)(size.Width * _scaleFactor);
+                        fullHeight = height + ShadeBorder.Size.Vertical + PageMargin.Vertical;
+
+                        width = (int)(size.Height * _scaleFactor);
+                        maxFullWidth = (int)(_maxHeight * _scaleFactor) + ShadeBorder.Size.Horizontal + PageMargin.Horizontal;
+                        fullWidth = width + ShadeBorder.Size.Horizontal + PageMargin.Horizontal;
+                        thisLeftOffset = leftOffset + (maxFullWidth - fullWidth) / 2d;
+                        break;
+                }
+                //int height = (int)(size.Height * _scaleFactor);
+                //int fullHeight = height + ShadeBorder.Size.Vertical + PageMargin.Vertical;
+                //int width = (int)(size.Width * _scaleFactor);
+                //int maxFullWidth = (int)(_maxWidth * _scaleFactor) + ShadeBorder.Size.Horizontal + PageMargin.Horizontal;
+                //int fullWidth = width + ShadeBorder.Size.Horizontal + PageMargin.Horizontal;
+                //int thisLeftOffset = leftOffset + (maxFullWidth - fullWidth) / 2;
+                //Pasys^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^Added
 
                 while (_pageCache.Count <= page)
                 {
@@ -219,19 +307,19 @@ namespace PdfiumViewer
 
                 pageCache.Links = null;
                 pageCache.Bounds = new Rectangle(
-                    thisLeftOffset + ShadeBorder.Size.Left + PageMargin.Left,
+                    (int)thisLeftOffset + ShadeBorder.Size.Left + PageMargin.Left,
                     offset + ShadeBorder.Size.Top + PageMargin.Top,
-                    width,
-                    height
+                    (int)width,
+                    (int)height
                 );
                 pageCache.OuterBounds = new Rectangle(
-                    thisLeftOffset,
+                    (int)thisLeftOffset,
                     offset,
-                    width + ShadeBorder.Size.Horizontal + PageMargin.Horizontal,
-                    height + ShadeBorder.Size.Vertical + PageMargin.Vertical
+                    (int)width + ShadeBorder.Size.Horizontal + PageMargin.Horizontal,
+                    (int)height + ShadeBorder.Size.Vertical + PageMargin.Vertical
                 );
 
-                offset += fullHeight;
+                offset += (int)fullHeight;
             }
         }
 
@@ -334,6 +422,9 @@ namespace PdfiumViewer
                     DrawPageImage(e.Graphics, page, pageBounds);
 
                     _shadeBorder.Draw(e.Graphics, pageBounds);
+                    var pageOutBounds = pageCache.OuterBounds;
+                    pageOutBounds.Offset(leftOffset, topOffset);
+                    e.Graphics.DrawRectangle(Pens.Blue, pageOutBounds);
                 }
             }
 
@@ -345,14 +436,33 @@ namespace PdfiumViewer
 
         private void DrawPageImage(Graphics graphics, int page, Rectangle pageBounds)
         {
-            _document.Render(page, graphics, graphics.DpiX, graphics.DpiY, pageBounds, false);
+            _document.Render(page, graphics, graphics.DpiX, graphics.DpiY, pageBounds, (int)_rotateType, false);
         }
 
         protected override Rectangle GetDocumentBounds()
         {
-            int height = (int)(_height * _scaleFactor + (ShadeBorder.Size.Vertical + PageMargin.Vertical) * _document.PageCount);
-            int width = (int)(_maxWidth * _scaleFactor + ShadeBorder.Size.Horizontal + PageMargin.Horizontal);
-            
+
+            //Pasys^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^Added
+            int height = 0;
+            int width = 0;
+            switch (_rotateType)
+            {
+                case PdfiumViewer.RotateType.RotateNone:
+                case PdfiumViewer.RotateType.Rotate180:
+                    height = (int)(_height * _scaleFactor + (ShadeBorder.Size.Vertical + PageMargin.Vertical) * _document.PageCount);
+                    width = (int)(_maxWidth * _scaleFactor + ShadeBorder.Size.Horizontal + PageMargin.Horizontal);
+                    break;
+                case PdfiumViewer.RotateType.Rotate90:
+                case PdfiumViewer.RotateType.Rotate270:
+                    height = (int)(_height * _scaleFactor + (ShadeBorder.Size.Vertical + PageMargin.Vertical) * _document.PageCount);
+                    width = (int)(_maxWidth * _scaleFactor + ShadeBorder.Size.Horizontal + PageMargin.Horizontal);
+                    break;
+            }
+
+            //int height = (int)(_height * _scaleFactor + (ShadeBorder.Size.Vertical + PageMargin.Vertical) * _document.PageCount);
+            //int width = (int)(_maxWidth * _scaleFactor + ShadeBorder.Size.Horizontal + PageMargin.Horizontal);
+            //Pasys^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^Added
+
             var center = new Point(
                 DisplayRectangle.Width / 2,
                 DisplayRectangle.Height / 2
@@ -361,7 +471,8 @@ namespace PdfiumViewer
             if (
                 DisplayRectangle.Width > ClientSize.Width ||
                 DisplayRectangle.Height > ClientSize.Height
-            ) {
+            )
+            {
                 center.X += DisplayRectangle.Left;
                 center.Y += DisplayRectangle.Top;
             }

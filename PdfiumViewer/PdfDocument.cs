@@ -82,9 +82,9 @@ namespace PdfiumViewer
         /// <param name="dpiY">Vertical DPI.</param>
         /// <param name="bounds">Bounds to render the page in.</param>
         /// <param name="forPrinting">Render the page for printing.</param>
-        public void Render(int page, Graphics graphics, float dpiX, float dpiY, Rectangle bounds, bool forPrinting)
+        public void Render(int page, Graphics graphics, float dpiX, float dpiY, Rectangle bounds, int rotate, bool forPrinting)
         {
-            Render(page, graphics, dpiX, dpiY, bounds, forPrinting ? PdfRenderFlags.ForPrinting : PdfRenderFlags.None);
+            Render(page, graphics, dpiX, dpiY, bounds, rotate, forPrinting ? PdfRenderFlags.ForPrinting : PdfRenderFlags.None);
         }
 
         /// <summary>
@@ -96,7 +96,7 @@ namespace PdfiumViewer
         /// <param name="dpiY">Vertical DPI.</param>
         /// <param name="bounds">Bounds to render the page in.</param>
         /// <param name="flags">Flags used to influence the rendering.</param>
-        public void Render(int page, Graphics graphics, float dpiX, float dpiY, Rectangle bounds, PdfRenderFlags flags)
+        public void Render(int page, Graphics graphics, float dpiX, float dpiY, Rectangle bounds, int rotate, PdfRenderFlags flags)
         {
             if (graphics == null)
                 throw new ArgumentNullException("graphics");
@@ -129,7 +129,7 @@ namespace PdfiumViewer
                     page,
                     dc,
                     (int)dpiX, (int)dpiY,
-                    0, 0, bounds.Width, bounds.Height,
+                    0, 0, bounds.Width, bounds.Height, rotate,
                     FlagsToFPDFFlags(flags)
                 );
 
