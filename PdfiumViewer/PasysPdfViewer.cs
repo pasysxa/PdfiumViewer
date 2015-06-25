@@ -15,10 +15,14 @@ namespace PdfiumViewer
     {
         private PdfDocument _document;
 
+        public event Action<SortedList<int, string>> ToBitmapsFinished;
+        public event Action ZoomChanged;
+
         public PasysPdfViewer()
         {
             InitializeComponent();
             DefaultPrintMode = PdfPrintMode.CutMargin;
+            renderer.ZoomChanged += renderer_ZoomChanged;
         }
 
         /// <summary>
@@ -192,7 +196,7 @@ namespace PdfiumViewer
         /// <param name="reduceRate">イメージの縮小率</param>
         public void ToBitmaps(float reduceRate)
         {
-            if (reduceRate < 0.1 || reduceRate > 1)
+            if (reduceRate < 0.01 || reduceRate > 1)
             {
                 new ArgumentException("0.1~1間の値を設定しかないです");
             }
@@ -207,9 +211,9 @@ namespace PdfiumViewer
             {
                 Directory.CreateDirectory(Path.Combine(BaseSaveBitmapsPath, folderName));
             }
-
             try
             {
+                var sortedList = new SortedList<int, string>();
                 var fileName = Path.GetFileNameWithoutExtension(_fileName);
                 for (int i = 0; i < Document.PageCount; i++)
                 {
@@ -220,9 +224,12 @@ namespace PdfiumViewer
                     using (var image = Document.Render(
                             i, imageWidth, imageHeight, 96, 96, (int)renderer.RotateType, false))
                     {
-                        image.Save(Path.Combine(BaseSaveBitmapsPath, folderName, string.Format("{0}_{1}.png", fileName, i)));
+                        var path = Path.Combine(BaseSaveBitmapsPath, folderName, string.Format("{0}_{1}.png", fileName, i));
+                        image.Save(path);
+                        sortedList.Add(i, path);
                     }
                 }
+                OnToBitmapsFinished(sortedList);
             }
             catch
             {
@@ -254,6 +261,7 @@ namespace PdfiumViewer
 
             try
             {
+                var sortedList = new SortedList<int, string>();
                 var fileName = Path.GetFileNameWithoutExtension(_fileName);
                 for (int i = 0; i < Document.PageCount; i++)
                 {
@@ -273,13 +281,37 @@ namespace PdfiumViewer
                     using (var image = Document.Render(
                             i, imageWidth, imageHeight, 96, 96, (int)RotateType, false))
                     {
-                        image.Save(Path.Combine(BaseSaveBitmapsPath, folderName, string.Format("{0}_{1}.png", fileName, i)));
+                        var path = Path.Combine(BaseSaveBitmapsPath, folderName, string.Format("{0}_{1}.png", fileName, i));
+                        image.Save(path);
+                        sortedList.Add(i, path);
                     }
                 }
+                OnToBitmapsFinished(sortedList);
             }
             catch
             {
 
+            }
+        }
+
+        protected virtual void OnToBitmapsFinished(SortedList<int, string> pathList)
+        {
+            if (ToBitmapsFinished != null)
+            {
+                ToBitmapsFinished(pathList);
+            }
+        }
+
+        private void renderer_ZoomChanged(object sender, EventArgs e)
+        {
+            OnZoomChanged();
+        }
+
+        protected virtual void OnZoomChanged()
+        {
+            if (ZoomChanged != null)
+            {
+                ZoomChanged();
             }
         }
     }
