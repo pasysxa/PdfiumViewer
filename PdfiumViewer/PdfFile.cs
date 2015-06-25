@@ -29,6 +29,8 @@ namespace PdfiumViewer
             return new PdfBufferFile(StreamExtensions.ToByteArray(stream));
         }
 
+        public IntPtr DocumentHandle { get { return _document; } }
+
         protected PdfFile()
         {
             PdfLibrary.EnsureLoaded();

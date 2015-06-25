@@ -50,6 +50,7 @@
     <Compile Include="CustomScrollControl.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="FPDF_FILEWRITE.cs" />
     <Compile Include="NativeMethods.cs" />
     <Compile Include="NativeMethods.Pdfium.cs" />
     <Compile Include="PanningZoomingScrollControl.cs">

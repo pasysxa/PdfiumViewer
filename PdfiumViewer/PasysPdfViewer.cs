@@ -271,7 +271,7 @@ namespace PdfiumViewer
                     }
 
                     using (var image = Document.Render(
-                            i, imageWidth, imageHeight, 96, 96, (int)renderer.RotateType, false))
+                            i, imageWidth, imageHeight, 96, 96, (int)RotateType, false))
                     {
                         image.Save(Path.Combine(BaseSaveBitmapsPath, folderName, string.Format("{0}_{1}.png", fileName, i)));
                     }

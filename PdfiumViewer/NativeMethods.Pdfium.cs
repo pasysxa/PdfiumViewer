@@ -6,7 +6,7 @@ using System.Windows.Forms;
 
 namespace PdfiumViewer
 {
-    partial class NativeMethods
+    internal partial class NativeMethods
     {
         // Interned strings are cached over AppDomains. This means that when we
         // lock on this string, we actually lock over AppDomain's. The Pdfium
@@ -359,6 +359,34 @@ namespace PdfiumViewer
             }
         }
 
+        public static bool FPDF_SaveAsCopy(IntPtr document, FPDF_FILEWRITE saveData, int flag)
+        {
+            lock (LockString)
+            {
+                return Imports.FPDF_SaveAsCopy(document, saveData, flag);
+            }
+        }
+
+        public static bool FPDF_ImportPages(IntPtr dest_doc, IntPtr src_doc, string pagerange, int index)
+        {
+            return Imports.FPDF_ImportPages(dest_doc, src_doc, pagerange, index);
+        }
+
+        public static IntPtr FPDF_CreateNewDocument()
+        {
+            return Imports.FPDF_CreateNewDocument();
+        }
+
+        public static int FPDFPage_GetRotation(IntPtr page)
+        {
+            return Imports.FPDFPage_GetRotation(page);
+        }
+
+        public static void FPDFPage_SetRotation(IntPtr page, int rotate)
+        {
+            Imports.FPDFPage_SetRotation(page, (int)rotate);
+        }
+
         private static class Imports
         {
             [DllImport("pdfium.dll")]
@@ -489,6 +517,23 @@ namespace PdfiumViewer
 
             [DllImport("pdfium.dll")]
             public static extern uint FPDFAction_GetURIPath(IntPtr document, IntPtr action, StringBuilder buffer, uint buflen);
+
+            [DllImport("pdfium.dll", CharSet = CharSet.Auto, SetLastError = true)]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            public static extern bool FPDF_SaveAsCopy(IntPtr document, [MarshalAs(UnmanagedType.LPStruct)]   FPDF_FILEWRITE saveData, int flag);
+
+            [DllImport("pdfium.dll", CharSet = CharSet.Auto, SetLastError = true)]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            public static extern bool FPDF_ImportPages(IntPtr dest_doc, IntPtr src_doc, [MarshalAs(UnmanagedType.LPStr)] string pagerange, int index);
+
+            [DllImport("pdfium.dll", CharSet = CharSet.Auto, SetLastError = true)]
+            public static extern IntPtr FPDF_CreateNewDocument();
+
+            [DllImport("pdfium.dll", CharSet = CharSet.Auto, SetLastError = true)]
+            public static extern void FPDFPage_SetRotation(IntPtr page, int rotate);
+
+            [DllImport("pdfium.dll", CharSet = CharSet.Auto, SetLastError = true)]
+            public static extern int FPDFPage_GetRotation(IntPtr page);
         }
 
         [StructLayout(LayoutKind.Sequential)]

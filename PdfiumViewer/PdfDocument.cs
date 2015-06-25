@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Drawing.Printing;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace PdfiumViewer
@@ -49,13 +50,14 @@ namespace PdfiumViewer
         /// </summary>
         public IList<SizeF> PageSizes { get; private set; }
 
+        public IntPtr Handle { get; private set; }
         private PdfDocument(Stream stream)
             : this(PdfFile.Create(stream))
         {
         }
 
         private PdfDocument(string path)
-            : this(File.OpenRead(path))
+            : this(File.Open(path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
         {
         }
 
@@ -339,5 +341,36 @@ namespace PdfiumViewer
                 _disposed = true;
             }
         }
+
+        //    public void Save(string path, RotateType rotateType)
+        //    {
+        //        //IntPtr newDocument = NativeMethods.FPDF_CreateNewDocument();
+        //        //if (newDocument == IntPtr.Zero)
+        //        //    return;
+        //        //if (!NativeMethods.FPDF_ImportPages(newDocument, _file.DocumentHandle, null, 0))
+        //        //    return;
+
+        //        //if (!NativeMethods.FPDF_ImportPages(_file.DocumentHandle, newDocument, null, 0))
+        //        //    return;
+
+        //        //int pageCount = NativeMethods.FPDF_GetPageCount(newDocument);
+
+        //        //NativeMethods.FPDF_CloseDocument(newDocument);
+
+
+        //        using (FileStream fileStream = File.Create(path))
+        //        {
+        //            FPDF_FILEWRITE saveData = new FPDF_FILEWRITE();
+        //            saveData.WriteBlock = (WriteBlockCallback)((pThis, buffer, buflen) =>
+        //            {
+        //                fileStream.Write(buffer, 0, buffer.Length);
+        //                return true;
+        //            });
+
+        //            NativeMethods.FPDF_SaveAsCopy(_file.DocumentHandle, saveData, 1);
+        //        }
+
+        //        System.Windows.Forms.MessageBox.Show("aaaaaaaaaa");
+        //    }
     }
 }
